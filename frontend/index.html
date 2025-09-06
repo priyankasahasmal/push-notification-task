@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FCM Test</title>
+
+  <!-- Firebase v9 compat scripts for messaging -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-messaging-compat.js"></script>
+</head>
+<body>
+  <h1>Firebase Cloud Messaging Test</h1>
+  <button id="getTokenBtn">Get FCM Token</button>
+
+ 
+  <script>
+  // 1️⃣ Initialize Firebase
+  const firebaseConfig = {
+    apiKey: "AIzaSyC9slEJJveJecsnjOuLg1UpyKDV146xvQY",
+    authDomain: "push--notification-task.firebaseapp.com",
+    projectId: "push--notification-task",
+    storageBucket: "push--notification-task.firebasestorage.app",
+    messagingSenderId: "213486219690",
+    appId: "1:213486219690:web:dc2063ff36f658576d7bd3"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+
+  const messaging = firebase.messaging();
+
+  // 2️⃣ Register Service Worker
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/firebase-messaging-sw.js') // ✅ at root
+      .then(async (registration) => {
+        console.log('Service Worker registered with scope:', registration.scope);
+
+        // 3️⃣ Hook button AFTER SW is ready
+        document.getElementById('getTokenBtn').addEventListener('click', async () => {
+          try {
+            const permission = await Notification.requestPermission();
+            if (permission !== 'granted') {
+              alert('Notification permission denied');
+              return;
+            }
+
+            // ✅ Pass registration to messaging
+            const token = await messaging.getToken({
+              vapidKey: 'BNtFfMLAHLWqOaNBzk-gujev6xj_MjoJ92DDGZTYWpekdgNQJr4PTjs4JO9oXcBJjErL-pNCJM4F7RLNSmICthY',
+              serviceWorkerRegistration: registration
+            });
+
+            console.log('e2robMiHje3UgH-YWAwea6:APA91bEmXKcoQAFrheDwRSRpmxCOnvJ54R_MAu32QQYtK86MMsp4JWBCAjnRr41gjttCpiobqUYAYugYu8fGq5-YGubNz5Rzieqyho51vgsxx-RxfU9W-xo', token);
+            alert('Check console for FCM token!');
+          } catch (err) {
+            console.error('Error getting token:', err);
+          }
+        });
+      })
+      .catch((err) => {
+        console.error('Service Worker registration failed:', err);
+      });
+  }
+</script>
+
+</body>
+</html>
